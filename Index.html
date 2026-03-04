@@ -1,0 +1,514 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Search, 
+  Car, 
+  Calendar, 
+  Settings2, 
+  ChevronRight, 
+  MessageCircle, 
+  Calculator, 
+  User, 
+  ShieldCheck,
+  MapPin,
+  Clock,
+  CheckCircle2,
+  X,
+  Phone,
+  Info,
+  ChevronDown,
+  SteeringWheel
+} from 'lucide-react';
+
+const App = () => {
+  // State Management
+  const [activeTab, setActiveTab] = useState('home');
+  const [filterType, setFilterType] = useState('Semua');
+  const [priceRange, setPriceRange] = useState(1000000000);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
+
+  // Mock Data Mobil
+  const cars = [
+    {
+      id: 1,
+      name: "Honda HR-V 1.5 SE",
+      year: 2022,
+      price: 345000000,
+      transmission: "AT",
+      km: "15.000",
+      location: "Jakarta Selatan",
+      image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800",
+      isSold: false,
+      fuel: "Bensin"
+    },
+    {
+      id: 2,
+      name: "Toyota Avanza 1.5 G",
+      year: 2021,
+      price: 215000000,
+      transmission: "MT",
+      km: "30.000",
+      location: "Bandung",
+      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800",
+      isSold: true,
+      fuel: "Bensin"
+    },
+    {
+      id: 3,
+      name: "Mitsubishi Pajero Sport Dakar",
+      year: 2019,
+      price: 485000000,
+      transmission: "AT",
+      km: "55.000",
+      location: "Surabaya",
+      image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800",
+      isSold: false,
+      fuel: "Diesel"
+    },
+    {
+      id: 4,
+      name: "Suzuki XL7 Alpha",
+      year: 2023,
+      price: 260000000,
+      transmission: "AT",
+      km: "5.000",
+      location: "Medan",
+      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800",
+      isSold: false,
+      fuel: "Bensin"
+    }
+  ];
+
+  // Filtering Logic
+  const filteredCars = useMemo(() => {
+    return cars.filter(car => {
+      const matchSearch = car.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchTrans = filterType === 'Semua' || car.transmission === filterType;
+      const matchPrice = car.price <= priceRange;
+      return matchSearch && matchTrans && matchPrice;
+    });
+  }, [searchQuery, filterType, priceRange]);
+
+  // Simulasi Kredit State
+  const [dp, setDp] = useState(50000000);
+  const [tenor, setTenor] = useState(36);
+  const [interest, setInterest] = useState(5);
+
+  const calculateMonthly = (price) => {
+    const principal = price - dp;
+    const totalInterest = (principal * (interest / 100)) * (tenor / 12);
+    const totalPayable = principal + totalInterest;
+    return Math.round(totalPayable / tenor);
+  };
+
+  const formatIDR = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+
+  // Components
+  const Navbar = () => (
+    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Brand Logo & Main Nav */}
+        <div className="flex items-center gap-10">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('home')}>
+            <div className="bg-blue-600 p-2 rounded-xl text-white group-hover:rotate-12 transition-transform duration-300">
+              <Car size={28} strokeWidth={2.5} />
+            </div>
+            <span className="text-2xl font-black text-gray-900 tracking-tighter">
+              First<span className="text-blue-600">Car</span>
+            </span>
+          </div>
+
+          {/* Desktop Menu - Next to Logo */}
+          <div className="hidden lg:flex items-center gap-8 font-bold text-gray-600">
+            <button 
+              className="flex items-center gap-1.5 hover:text-blue-600 transition"
+              onClick={() => {
+                const msg = "Halo FirstCar, saya ingin jadwal Test Drive. Bisa bantu informasikan prosedurnya?";
+                window.open(`https://wa.me/628123456789?text=${encodeURIComponent(msg)}`, '_blank');
+              }}
+            >
+              <SteeringWheel size={18} className="text-blue-600" />
+              Test Drive
+            </button>
+            <button className="flex items-center gap-1 hover:text-blue-600 transition">
+              Beli Mobil <ChevronDown size={16} />
+            </button>
+            <button className="hover:text-blue-600 transition">Jual Mobil</button>
+            <button className="hover:text-blue-600 transition">Simulasi Kredit</button>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-4">
+          <div className="hidden xl:flex items-center gap-2 text-gray-500 mr-4 pr-4 border-r border-gray-200">
+            <Phone size={18} className="text-blue-600" />
+            <span className="text-sm font-bold">0812-3456-789</span>
+          </div>
+          <button className="flex items-center gap-2 bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-lg shadow-gray-200">
+            <User size={18} />
+            <span>Masuk / Daftar</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+
+  const Hero = () => (
+    <div className="max-w-7xl mx-auto px-6 mt-8">
+      <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-blue-800 text-white py-20 px-12 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+        <div className="relative z-10 max-w-3xl">
+          <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-md px-4 py-2 rounded-full text-blue-300 text-xs font-bold uppercase tracking-widest mb-6 border border-blue-500/30">
+            <ShieldCheck size={14} /> Terpercaya Sejak 2010
+          </div>
+          <h1 className="text-6xl font-black mb-6 leading-[1.1]">Temukan Mobil Bekas Berkualitas.</h1>
+          <p className="text-blue-100 text-xl mb-10 opacity-80 leading-relaxed">
+            Jaringan showroom nasional terbesar. Setiap unit telah melalui inspeksi ketat 175 titik untuk menjamin kepuasan Anda.
+          </p>
+          
+          {/* Search Bar PC */}
+          <div className="bg-white p-3 rounded-2xl flex items-center gap-3 shadow-2xl max-w-2xl border border-white/20">
+            <div className="flex-1 flex items-center px-5 py-4 bg-gray-50 rounded-xl">
+              <Search className="text-gray-400 mr-4" size={24} />
+              <input 
+                type="text" 
+                placeholder="Cari Mobil (ex: Mitsubishi Pajero, Honda HR-V...)" 
+                className="bg-transparent outline-none text-gray-800 w-full text-lg font-medium"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <button className="bg-blue-600 text-white px-10 py-4 rounded-xl font-black text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-400/30">
+              Cari
+            </button>
+          </div>
+        </div>
+
+        {/* Decorator */}
+        <div className="absolute right-[-5%] bottom-[-10%] opacity-10 pointer-events-none scale-150">
+          <Car size={400} strokeWidth={0.5} />
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-white font-sans">
+      <Navbar />
+      
+      {activeTab === 'home' && (
+        <div className="pb-20">
+          <Hero />
+          
+          <main className="max-w-7xl mx-auto px-6 py-16">
+            {/* Filter Section Desktop */}
+            <div className="flex flex-col md:flex-row items-center justify-between mb-12 pb-8 border-b border-gray-100 gap-8">
+              <div>
+                <h2 className="text-3xl font-black text-gray-900 mb-2">Katalog Terbaru</h2>
+                <p className="text-gray-500 font-medium">Menampilkan {filteredCars.length} unit mobil pilihan di seluruh Indonesia</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-1 bg-gray-100 p-1.5 rounded-2xl">
+                  {['Semua', 'AT', 'MT'].map(t => (
+                    <button 
+                      key={t}
+                      onClick={() => setFilterType(t)}
+                      className={`px-8 py-2.5 rounded-xl text-sm font-bold transition ${filterType === t ? 'bg-white text-blue-600 shadow-md' : 'text-gray-500 hover:text-gray-800'}`}
+                    >
+                      {t === 'Semua' ? 'Semua' : t}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-gray-200">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Budget Maksimal</span>
+                    <span className="text-sm text-blue-600 font-black">{formatIDR(priceRange)}</span>
+                  </div>
+                  <input 
+                    type="range" min="100000000" max="1000000000" step="50000000"
+                    value={priceRange}
+                    onChange={(e) => setPriceRange(parseInt(e.target.value))}
+                    className="accent-blue-600 w-32"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Car Grid PC: Optimized for 4 columns on large screens */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredCars.map(car => (
+                <div 
+                  key={car.id} 
+                  className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.1)] transition-all duration-500 group cursor-pointer"
+                  onClick={() => setSelectedCar(car)}
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img 
+                      src={car.image} 
+                      alt={car.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    {car.isSold && (
+                      <div className="absolute top-5 right-5 bg-red-600 text-white px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">
+                        Terjual
+                      </div>
+                    )}
+                    <div className="absolute bottom-5 left-5">
+                       <span className="bg-white/90 backdrop-blur-md text-gray-900 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg">
+                          <MapPin size={14} className="text-blue-600" /> {car.location}
+                       </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-blue-600 text-xs font-black px-3 py-1 bg-blue-50 rounded-lg">{car.year}</span>
+                      <div className="flex items-center gap-1 text-gray-400 text-xs font-bold">
+                         <Clock size={14} /> {car.km} KM
+                      </div>
+                    </div>
+                    
+                    <h3 className="font-black text-gray-900 text-xl mb-2 group-hover:text-blue-600 transition-colors">{car.name}</h3>
+                    <p className="text-2xl font-black text-blue-600 mb-6">{formatIDR(car.price)}</p>
+                    
+                    <div className="flex items-center gap-4 mb-6 text-sm text-gray-500 font-bold border-t border-gray-50 pt-4">
+                      <div className="flex items-center gap-2">
+                        <Settings2 size={16} className="text-blue-400" />
+                        <span>{car.transmission}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Info size={16} className="text-blue-400" />
+                        <span>{car.fuel}</span>
+                      </div>
+                    </div>
+
+                    <button 
+                      className="w-full bg-gray-50 text-gray-900 py-4 rounded-2xl font-black flex items-center justify-center gap-2 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const msg = `Halo FirstCar, saya tertarik dengan ${car.name} (${car.year}). Mohon info jadwal survey unitnya.`;
+                        window.open(`https://wa.me/628123456789?text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                    >
+                      <MessageCircle size={20} />
+                      Detail & WhatsApp
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {filteredCars.length === 0 && (
+              <div className="text-center py-32 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                <Car className="mx-auto text-gray-300 mb-6" size={80} />
+                <h3 className="text-2xl font-black text-gray-900 mb-2">Pencarian Tidak Ditemukan</h3>
+                <p className="text-gray-500 font-medium">Coba gunakan filter lain atau hubungi admin FirstCar untuk permintaan unit khusus.</p>
+              </div>
+            )}
+          </main>
+        </div>
+      )}
+
+      {/* Modal Detail & Simulasi */}
+      {selectedCar && (
+        <div className="fixed inset-0 z-[60] bg-gray-900/40 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="bg-white w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-[2.5rem] shadow-2xl relative flex flex-col md:flex-row">
+            <button 
+              onClick={() => setSelectedCar(null)}
+              className="absolute top-6 right-6 z-20 p-3 bg-white/80 hover:bg-white rounded-full shadow-lg text-gray-900 transition"
+            >
+              <X size={24} />
+            </button>
+            
+            <div className="w-full md:w-[55%] h-64 md:h-auto overflow-hidden">
+              <img src={selectedCar.image} className="w-full h-full object-cover" />
+            </div>
+
+            <div className="w-full md:w-[45%] p-10 overflow-y-auto">
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Tersedia</span>
+                  <span className="text-gray-400 font-bold text-sm">Unit ID: #FC-{selectedCar.id}00{selectedCar.year}</span>
+                </div>
+                <h2 className="text-4xl font-black text-gray-900 mb-4">{selectedCar.name}</h2>
+                <div className="grid grid-cols-3 gap-4">
+                   <div className="bg-gray-50 p-3 rounded-2xl text-center">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Tahun</p>
+                      <p className="text-sm font-black text-gray-900">{selectedCar.year}</p>
+                   </div>
+                   <div className="bg-gray-50 p-3 rounded-2xl text-center">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Transmisi</p>
+                      <p className="text-sm font-black text-gray-900">{selectedCar.transmission}</p>
+                   </div>
+                   <div className="bg-gray-50 p-3 rounded-2xl text-center">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">BBM</p>
+                      <p className="text-sm font-black text-gray-900">{selectedCar.fuel}</p>
+                   </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-600 p-6 rounded-3xl text-white mb-8 shadow-xl shadow-blue-200">
+                <p className="text-blue-100 text-sm font-bold mb-1">Harga Tunai FirstCar</p>
+                <p className="text-4xl font-black">{formatIDR(selectedCar.price)}</p>
+              </div>
+
+              <div className="space-y-5 mb-10">
+                <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-gray-50 transition">
+                  <div className="bg-green-100 p-2 rounded-xl text-green-600"><ShieldCheck size={24} /></div>
+                  <div>
+                    <p className="font-black text-gray-900">Garansi 1 Tahun</p>
+                    <p className="text-sm text-gray-500 font-medium">Proteksi mesin & transmisi dari FirstCar Care.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-gray-50 transition">
+                   <div className="bg-blue-100 p-2 rounded-xl text-blue-600"><CheckCircle2 size={24} /></div>
+                   <div>
+                    <p className="font-black text-gray-900">Bebas Banjir & Tabrak</p>
+                    <p className="text-sm text-gray-500 font-medium">Lulus inspeksi profesional oleh tim ahli kami.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <button 
+                  onClick={() => setIsCreditModalOpen(true)}
+                  className="bg-white border-2 border-gray-100 text-gray-900 py-4 rounded-2xl font-black hover:border-blue-600 hover:text-blue-600 transition"
+                 >
+                   Simulasi Kredit
+                 </button>
+                 <button 
+                  className="bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-green-100 hover:bg-green-700 transition"
+                  onClick={() => {
+                    const msg = `Halo FirstCar, saya ingin Booking Test Drive untuk ${selectedCar.name}.`;
+                    window.open(`https://wa.me/628123456789?text=${encodeURIComponent(msg)}`, '_blank');
+                  }}
+                 >
+                   Test Drive
+                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Credit Modal */}
+      {isCreditModalOpen && (
+        <div className="fixed inset-0 z-[70] bg-gray-900/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl">
+            <button onClick={() => setIsCreditModalOpen(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-900 transition"><X /></button>
+            <h3 className="text-3xl font-black mb-8 text-gray-900">Simulasi <span className="text-blue-600">Kredit</span></h3>
+            
+            <div className="space-y-8">
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                   <label className="text-sm font-black text-gray-700 uppercase">Uang Muka (DP)</label>
+                   <span className="text-blue-600 font-black">{formatIDR(dp)}</span>
+                </div>
+                <input 
+                  type="range" min="20000000" max={selectedCar.price * 0.5} step="5000000"
+                  value={dp} onChange={(e) => setDp(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-black text-gray-700 uppercase mb-4">Pilih Tenor</label>
+                <div className="grid grid-cols-4 gap-3">
+                  {[12, 24, 36, 48, 60].map(t => (
+                    <button 
+                      key={t}
+                      onClick={() => setTenor(t)}
+                      className={`py-3 rounded-xl text-xs font-black border-2 transition ${tenor === t ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200' : 'bg-white text-gray-500 border-gray-100 hover:border-blue-200'}`}
+                    >
+                      {t/12} Thn
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gray-900 p-8 rounded-[2rem] text-center shadow-xl">
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Angsuran Per Bulan</p>
+                <p className="text-4xl font-black text-white">{formatIDR(calculateMonthly(selectedCar.price))}</p>
+                <div className="h-1 w-12 bg-blue-600 mx-auto mt-4 rounded-full"></div>
+              </div>
+
+              <button 
+                className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-100 hover:bg-blue-700 transition"
+                onClick={() => {
+                  const msg = `Halo FirstCar, saya sudah melakukan simulasi kredit untuk ${selectedCar.name}. DP: ${formatIDR(dp)}, Tenor: ${tenor} bulan. Mohon bantuannya untuk proses pengajuan.`;
+                  window.open(`https://wa.me/628123456789?text=${encodeURIComponent(msg)}`, '_blank');
+                }}
+              >
+                Ajukan Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer Desktop */}
+      <footer className="bg-gray-900 text-white py-20">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-blue-600 p-2 rounded-xl text-white">
+                <Car size={28} strokeWidth={2.5} />
+              </div>
+              <span className="text-3xl font-black tracking-tighter">
+                First<span className="text-blue-600">Car</span>
+              </span>
+            </div>
+            <p className="text-gray-400 text-lg max-w-md leading-relaxed">
+              Platform jual beli mobil bekas terpercaya dengan jaringan nasional. Kami memberikan kemudahan bagi Anda untuk menemukan mobil impian dengan proses yang transparan.
+            </p>
+          </div>
+          <div>
+            <h4 className="text-xl font-black mb-6">Navigasi</h4>
+            <ul className="space-y-4 text-gray-400 font-bold">
+              <li><button className="hover:text-blue-500 transition">Beli Mobil</button></li>
+              <li><button className="hover:text-blue-500 transition">Jual Mobil</button></li>
+              <li><button className="hover:text-blue-500 transition">Simulasi Kredit</button></li>
+              <li><button className="hover:text-blue-500 transition">Pusat Bantuan</button></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-xl font-black mb-6">Kontak</h4>
+            <ul className="space-y-4 text-gray-400 font-bold">
+              <li className="flex items-center gap-3"><Phone size={18} className="text-blue-600" /> 0812-3456-789</li>
+              <li className="flex items-center gap-3"><MapPin size={18} className="text-blue-600" /> HQ: Jakarta Selatan</li>
+              <li className="flex items-center gap-3 font-medium opacity-60">CS tersedia 24/7 via WhatsApp</li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-6 mt-20 pt-10 border-t border-gray-800 text-center text-gray-500 font-bold text-sm">
+          &copy; 2024 FirstCar Indonesia. All rights reserved.
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+// Custom Icon for Steering Wheel
+const SteeringWheel = ({ size = 24, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+    <path d="M12 2v8" />
+    <path d="M10.3 13.7l-5.3 5.3" />
+    <path d="M13.7 13.7l5.3 5.3" />
+  </svg>
+);
+
+export default App;
